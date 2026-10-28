@@ -74,6 +74,18 @@ class OrdenResponse(BaseModel):
         from_attributes = True
 
 
+class HistorialResponse(BaseModel):
+    id: str
+    estado_anterior: str
+    estado_nuevo: str
+    usuario_id: str
+    comentario: Optional[str] = None
+    timestamp: datetime
+
+    class Config:
+        from_attributes = True
+
+
 class CambioEstadoRequest(BaseModel):
     estado_nuevo: str
     comentario: Optional[str] = None
