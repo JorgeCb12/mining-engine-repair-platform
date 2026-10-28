@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import models
 from database import engine, Base
-from routers import clientes  # <-- Importamos las rutas
+from routers import clientes, motores
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -16,8 +16,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Registramos las rutas
 app.include_router(clientes.router)
+app.include_router(motores.router)
 
 
 @app.get("/health")

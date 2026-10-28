@@ -24,3 +24,28 @@ class ClienteResponse(ClienteBase):
 
     class Config:
         from_attributes = True
+
+
+class MotorBase(BaseModel):
+    codigo_interno: str
+    numero_serie: str
+    fabricante: str
+    modelo: str
+    tipo_motor: str
+    potencia_hp: int
+    horas_de_uso: int = 0
+    ubicacion_actual: str
+    cliente_propietario_id: str
+
+
+class MotorCreate(MotorBase):
+    pass
+
+
+class MotorResponse(MotorBase):
+    id: str
+    estado_activo: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

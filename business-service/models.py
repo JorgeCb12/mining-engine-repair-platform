@@ -21,3 +21,24 @@ class Cliente(Base):
     estado_activo = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class Motor(Base):
+    __tablename__ = "motores"
+    __table_args__ = {"schema": "business"}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    codigo_interno = Column(String, nullable=False)
+    numero_serie = Column(String, unique=True, nullable=False)
+    fabricante = Column(String, nullable=False)
+    modelo = Column(String, nullable=False)
+    tipo_motor = Column(String, nullable=False)
+    potencia_hp = Column(Integer, nullable=False)
+    horas_de_uso = Column(Integer, default=0)
+    ubicacion_actual = Column(String, nullable=False)
+    cliente_propietario_id = Column(
+        String, ForeignKey("business.clientes.id"), nullable=False
+    )
+    estado_activo = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
