@@ -42,3 +42,42 @@ class Motor(Base):
     estado_activo = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class OrdenReparacion(Base):
+    __tablename__ = "ordenes_reparacion"
+    __table_args__ = {"schema": "business"}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    numero_orden = Column(String, unique=True, nullable=False)
+    motor_id = Column(String, ForeignKey("business.motores.id"), nullable=False)
+    cliente_id = Column(String, ForeignKey("business.clientes.id"), nullable=False)
+    estado_actual = Column(
+        String, default="recibido"
+    )  # recibido, en_diagnostico, esperando_aprobacion, en_reparacion, en_pruebas, finalizado, entregado
+    descripcion_falla = Column(String, nullable=False)
+    diagnostico = Column(String, nullable=True)
+    trabajos_realizados = Column(String, nullable=True)
+    costo_estimado = Column(
+        String, nullable=True
+    )  # Puedes usar Float/Numeric si prefieres
+    fecha_recepcion = Column(DateTime, default=datetime.utcnow)
+    fecha_estimada_entrega = Column(DateTime, nullable=True)
+    usuario_asignado_id = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class HistorialEstado(Base):
+    __tablename__ = "historial_estados"
+    __table_args__ = {"schema": "business"}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    orden_id = Column(
+        String, ForeignKey("business.ordenes_reparacion.id"), nullable=False
+    )
+    estado_anterior = Column(String, nullable=False)
+    estado_nuevo = Column(String, nullable=False)
+    usuario_id = Column(String, nullable=False)
+    comentario = Column(String, nullable=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)

@@ -49,3 +49,31 @@ class MotorResponse(MotorBase):
 
     class Config:
         from_attributes = True
+
+
+class OrdenCreate(BaseModel):
+    motor_id: str
+    cliente_id: str
+    descripcion_falla: str
+    fecha_estimada_entrega: Optional[datetime] = None
+    costo_estimado: Optional[str] = None
+    usuario_asignado_id: Optional[str] = None
+
+
+class OrdenResponse(BaseModel):
+    id: str
+    numero_orden: str
+    motor_id: str
+    cliente_id: str
+    estado_actual: str
+    descripcion_falla: str
+    fecha_recepcion: datetime
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class CambioEstadoRequest(BaseModel):
+    estado_nuevo: str
+    comentario: Optional[str] = None
