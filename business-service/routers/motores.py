@@ -25,3 +25,10 @@ def listar_motores(db: Session = Depends(get_db)):
 @router.get("/{motor_id}", response_model=schemas.MotorResponse)
 def obtener_motor(motor_id: str, db: Session = Depends(get_db)):
     return motor_service.get_by_id(db, motor_id)
+
+
+@router.put("/{motor_id}", response_model=schemas.MotorResponse)
+def actualizar_motor(
+    motor_id: str, datos: schemas.MotorCreate, db: Session = Depends(get_db)
+):
+    return motor_service.update(db, motor_id, datos)

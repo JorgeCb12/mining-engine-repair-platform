@@ -5,12 +5,14 @@ import {
   ChevronDown,
   Mail,
   MapPin,
+  Pencil,
   Phone,
   Plus,
   Search,
   UsersRound,
 } from "lucide-react";
 import { businessApi } from "../api/client";
+import { Modal } from "../components/ui/Modal";
 import type { Cliente } from "../types";
 
 interface ClienteForm {
@@ -88,11 +90,15 @@ const StatCard = ({
 export const Clientes = () => {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [form, setForm] = useState<ClienteForm>(initialForm);
+  const [editingCliente, setEditingCliente] = useState<Cliente | null>(null);
+  const [editForm, setEditForm] = useState<ClienteForm>(initialForm);
   const [busqueda, setBusqueda] = useState("");
   const [cargando, setCargando] = useState(true);
   const [creando, setCreando] = useState(false);
+  const [guardandoEdicion, setGuardandoEdicion] = useState(false);
   const [formAbierto, setFormAbierto] = useState(true);
   const [error, setError] = useState("");
+  const [errorEdicion, setErrorEdicion] = useState("");
   const [mensaje, setMensaje] = useState("");
 
   useEffect(() => {
@@ -135,6 +141,56 @@ export const Clientes = () => {
   const clientesActivos = clientes.filter(
     (cliente) => cliente.estado_activo,
   ).length;
+
+  const handleEdit = (cliente: Cliente) => {
+    setEditingCliente(cliente);
+    setEditForm({
+      razon_social: cliente.razon_social,
+      tipo_identificacion: cliente.tipo_identificacion,
+      numero_identificacion: cliente.numero_identificacion,
+      contacto_nombre: cliente.contacto_nombre,
+      contacto_email: cliente.contacto_email,
+      contacto_telefono: cliente.contacto_telefono,
+      ubicacion: cliente.ubicacion,
+    });
+    setErrorEdicion("");
+    setError("");
+    setMensaje("");
+  };
+
+  const handleUpdate = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!editingCliente) return;
+
+    setGuardandoEdicion(true);
+    setErrorEdicion("");
+    setError("");
+    setMensaje("");
+
+    try {
+      await businessApi.put<Cliente>(
+        `/clientes/${editingCliente.id}`,
+        editForm,
+      );
+      setEditingCliente(null);
+      setMensaje("El cliente se actualizó correctamente.");
+
+      try {
+        const res = await businessApi.get<Cliente[]>("/clientes/");
+        setClientes(res.data);
+      } catch {
+        setError(
+          "El cliente se actualizó, pero no se pudo actualizar la lista. Recarga la página para ver los cambios.",
+        );
+      }
+    } catch {
+      setErrorEdicion(
+        "No se pudo actualizar el cliente. Comprueba los datos y que el número de identificación no esté registrado en otro cliente.",
+      );
+    } finally {
+      setGuardandoEdicion(false);
+    }
+  };
 
   const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -408,7 +464,7 @@ export const Clientes = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                {["Cliente", "Identificación", "Contacto", "Ubicación", "Estado"].map(
+                {["Cliente", "Identificación", "Contacto", "Ubicación", "Estado", "Acciones"].map(
                   (heading) => (
                     <th
                       key={heading}
@@ -424,13 +480,13 @@ export const Clientes = () => {
             <tbody className="divide-y divide-gray-100 bg-white">
               {cargando ? (
                 <tr>
-                  <td colSpan={5} className="px-5 py-12 text-center text-sm text-gray-500">
+                  <td colSpan={6} className="px-5 py-12 text-center text-sm text-gray-500">
                     Cargando clientes...
                   </td>
                 </tr>
               ) : clientesFiltrados.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-5 py-12 text-center text-sm text-gray-500">
+                  <td colSpan={6} className="px-5 py-12 text-center text-sm text-gray-500">
                     {busqueda
                       ? "No encontramos clientes con esa búsqueda."
                       : "Aún no hay clientes registrados."}
@@ -477,6 +533,17 @@ export const Clientes = () => {
                         {cliente.estado_activo ? "Activo" : "Inactivo"}
                       </span>
                     </td>
+                    <td className="px-5 py-4">
+                      <button
+                        type="button"
+                        onClick={() => handleEdit(cliente)}
+                        aria-label={`Editar ${cliente.razon_social}`}
+                        className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-2 focus-visible:outline-blue-600"
+                      >
+                        <Pencil size={15} aria-hidden="true" />
+                        Editar
+                      </button>
+                    </td>
                   </tr>
                 ))
               )}
@@ -484,6 +551,141 @@ export const Clientes = () => {
           </table>
         </div>
       </section>
+
+      <Modal
+        isOpen={editingCliente !== null}
+        onClose={() => setEditingCliente(null)}
+        title="Editar cliente"
+      >
+        <form onSubmit={handleUpdate} className="grid gap-5">
+          {errorEdicion && (
+            <p
+              role="alert"
+              className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+            >
+              {errorEdicion}
+            </p>
+          )}
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <FormField label="Razón social" icon={<Building2 size={16} />}>
+              <input
+                className={controlClass}
+                value={editForm.razon_social}
+                onChange={(event) =>
+                  setEditForm({ ...editForm, razon_social: event.target.value })
+                }
+                autoComplete="organization"
+                required
+              />
+            </FormField>
+            <FormField
+              label="Tipo de identificación"
+              icon={<UsersRound size={16} />}
+            >
+              <select
+                className={controlClass}
+                value={editForm.tipo_identificacion}
+                onChange={(event) =>
+                  setEditForm({
+                    ...editForm,
+                    tipo_identificacion: event.target.value,
+                  })
+                }
+                required
+              >
+                <option value="RUT">RUT</option>
+                <option value="RUC">RUC</option>
+                <option value="NIT">NIT</option>
+                <option value="DNI">DNI</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </FormField>
+            <FormField
+              label="Número de identificación"
+              icon={<span className="font-bold">#</span>}
+            >
+              <input
+                className={controlClass}
+                value={editForm.numero_identificacion}
+                onChange={(event) =>
+                  setEditForm({
+                    ...editForm,
+                    numero_identificacion: event.target.value,
+                  })
+                }
+                required
+              />
+            </FormField>
+            <FormField label="Nombre de contacto" icon={<UsersRound size={16} />}>
+              <input
+                className={controlClass}
+                value={editForm.contacto_nombre}
+                onChange={(event) =>
+                  setEditForm({ ...editForm, contacto_nombre: event.target.value })
+                }
+                autoComplete="name"
+                required
+              />
+            </FormField>
+            <FormField label="Correo electrónico" icon={<Mail size={16} />}>
+              <input
+                className={controlClass}
+                type="email"
+                value={editForm.contacto_email}
+                onChange={(event) =>
+                  setEditForm({ ...editForm, contacto_email: event.target.value })
+                }
+                autoComplete="email"
+                required
+              />
+            </FormField>
+            <FormField label="Teléfono" icon={<Phone size={16} />}>
+              <input
+                className={controlClass}
+                type="tel"
+                value={editForm.contacto_telefono}
+                onChange={(event) =>
+                  setEditForm({
+                    ...editForm,
+                    contacto_telefono: event.target.value,
+                  })
+                }
+                autoComplete="tel"
+                required
+              />
+            </FormField>
+            <div className="sm:col-span-2">
+              <FormField label="Ubicación" icon={<MapPin size={16} />}>
+                <input
+                  className={controlClass}
+                  value={editForm.ubicacion}
+                  onChange={(event) =>
+                    setEditForm({ ...editForm, ubicacion: event.target.value })
+                  }
+                  autoComplete="street-address"
+                  required
+                />
+              </FormField>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
+            <button
+              type="button"
+              onClick={() => setEditingCliente(null)}
+              className="rounded-lg border border-gray-300 px-4 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-blue-600"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={guardandoEdicion}
+              className="inline-flex min-w-40 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:bg-blue-300"
+            >
+              {guardandoEdicion ? "Guardando..." : "Guardar cambios"}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

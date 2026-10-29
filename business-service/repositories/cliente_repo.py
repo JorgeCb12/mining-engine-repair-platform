@@ -8,13 +8,14 @@ def get_by_id(db: Session, cliente_id: str) -> models.Cliente | None:
 
 
 def get_by_numero_identificacion(
-    db: Session, numero_identificacion: str
+    db: Session, numero_identificacion: str, exclude_id: str | None = None
 ) -> models.Cliente | None:
-    return (
-        db.query(models.Cliente)
-        .filter(models.Cliente.numero_identificacion == numero_identificacion)
-        .first()
+    query = db.query(models.Cliente).filter(
+        models.Cliente.numero_identificacion == numero_identificacion
     )
+    if exclude_id is not None:
+        query = query.filter(models.Cliente.id != exclude_id)
+    return query.first()
 
 
 def get_all(db: Session) -> list[models.Cliente]:
@@ -29,7 +30,7 @@ def create(db: Session, cliente: models.Cliente) -> models.Cliente:
 
 
 def update(
-    db: Session, cliente: models.Cliente, data: dict
+    db: Session, cliente: models.Cliente, data: dict[str, object]
 ) -> models.Cliente:
     for key, value in data.items():
         setattr(cliente, key, value)

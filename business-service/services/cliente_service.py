@@ -30,4 +30,12 @@ def update(
     db: Session, cliente_id: str, data: schemas.ClienteCreate
 ) -> models.Cliente:
     cliente = get_by_id(db, cliente_id)
+    existente = cliente_repo.get_by_numero_identificacion(
+        db, data.numero_identificacion, exclude_id=cliente_id
+    )
+    if existente:
+        raise HTTPException(
+            status_code=400,
+            detail="El cliente con este número de identificación ya existe",
+        )
     return cliente_repo.update(db, cliente, data.model_dump())

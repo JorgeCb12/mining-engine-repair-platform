@@ -24,3 +24,13 @@ def create(db: Session, motor: models.Motor) -> models.Motor:
     db.commit()
     db.refresh(motor)
     return motor
+
+
+def update(
+    db: Session, motor: models.Motor, data: dict[str, object]
+) -> models.Motor:
+    for key, value in data.items():
+        setattr(motor, key, value)
+    db.commit()
+    db.refresh(motor)
+    return motor

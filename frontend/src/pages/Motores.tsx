@@ -5,12 +5,14 @@ import {
   Cog,
   Gauge,
   MapPin,
+  Pencil,
   Plus,
   Search,
   Truck,
   UsersRound,
 } from "lucide-react";
 import { businessApi } from "../api/client";
+import { Modal } from "../components/ui/Modal";
 import type { Cliente, Motor } from "../types";
 
 interface MotorForm {
@@ -93,11 +95,15 @@ export const Motores = () => {
   const [motores, setMotores] = useState<Motor[]>([]);
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [form, setForm] = useState<MotorForm>(initialForm);
+  const [editingMotor, setEditingMotor] = useState<Motor | null>(null);
+  const [editForm, setEditForm] = useState<MotorForm>(initialForm);
   const [busqueda, setBusqueda] = useState("");
   const [cargando, setCargando] = useState(true);
   const [creando, setCreando] = useState(false);
+  const [guardandoEdicion, setGuardandoEdicion] = useState(false);
   const [formAbierto, setFormAbierto] = useState(true);
   const [error, setError] = useState("");
+  const [errorEdicion, setErrorEdicion] = useState("");
   const [mensaje, setMensaje] = useState("");
 
   useEffect(() => {
@@ -148,6 +154,63 @@ export const Motores = () => {
 
   const motoresActivos = motores.filter((motor) => motor.estado_activo).length;
   const tiposMotor = new Set(motores.map((motor) => motor.tipo_motor)).size;
+
+  const handleEdit = (motor: Motor) => {
+    setEditingMotor(motor);
+    setEditForm({
+      codigo_interno: motor.codigo_interno,
+      numero_serie: motor.numero_serie,
+      fabricante: motor.fabricante,
+      modelo: motor.modelo,
+      tipo_motor: motor.tipo_motor,
+      potencia_hp: String(motor.potencia_hp),
+      horas_de_uso: String(motor.horas_de_uso),
+      ubicacion_actual: motor.ubicacion_actual,
+      cliente_propietario_id: motor.cliente_propietario_id,
+    });
+    setErrorEdicion("");
+    setError("");
+    setMensaje("");
+  };
+
+  const handleUpdate = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!editingMotor) return;
+
+    setGuardandoEdicion(true);
+    setErrorEdicion("");
+    setError("");
+    setMensaje("");
+
+    try {
+      const payload = {
+        ...editForm,
+        potencia_hp: Number(editForm.potencia_hp),
+        horas_de_uso: Number(editForm.horas_de_uso),
+      };
+      await businessApi.put<Motor>(
+        `/motores/${editingMotor.id}`,
+        payload,
+      );
+      setEditingMotor(null);
+      setMensaje("El motor se actualizó correctamente.");
+
+      try {
+        const res = await businessApi.get<Motor[]>("/motores/");
+        setMotores(res.data);
+      } catch {
+        setError(
+          "El motor se actualizó, pero no se pudo actualizar la lista. Recarga la página para ver los cambios.",
+        );
+      }
+    } catch {
+      setErrorEdicion(
+        "No se pudo actualizar el motor. Verifica los datos, el cliente y que el número de serie no esté registrado en otro motor.",
+      );
+    } finally {
+      setGuardandoEdicion(false);
+    }
+  };
 
   const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -442,7 +505,7 @@ export const Motores = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                {["Motor", "Nº de serie", "Tipo / potencia", "Horas", "Ubicación", "Estado"].map(
+                {["Motor", "Nº de serie", "Tipo / potencia", "Horas", "Ubicación", "Estado", "Acciones"].map(
                   (heading) => (
                     <th
                       key={heading}
@@ -458,13 +521,13 @@ export const Motores = () => {
             <tbody className="divide-y divide-gray-100 bg-white">
               {cargando ? (
                 <tr>
-                  <td colSpan={6} className="px-5 py-12 text-center text-sm text-gray-500">
+                  <td colSpan={7} className="px-5 py-12 text-center text-sm text-gray-500">
                     Cargando motores...
                   </td>
                 </tr>
               ) : motoresFiltrados.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-5 py-12 text-center text-sm text-gray-500">
+                  <td colSpan={7} className="px-5 py-12 text-center text-sm text-gray-500">
                     {busqueda
                       ? "No encontramos motores con esa búsqueda."
                       : "Aún no hay motores registrados."}
@@ -517,6 +580,17 @@ export const Motores = () => {
                         {motor.estado_activo ? "Activo" : "Inactivo"}
                       </span>
                     </td>
+                    <td className="px-5 py-4">
+                      <button
+                        type="button"
+                        onClick={() => handleEdit(motor)}
+                        aria-label={`Editar ${motor.fabricante} ${motor.modelo}`}
+                        className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-2 focus-visible:outline-blue-600"
+                      >
+                        <Pencil size={15} aria-hidden="true" />
+                        Editar
+                      </button>
+                    </td>
                   </tr>
                 ))
               )}
@@ -524,6 +598,154 @@ export const Motores = () => {
           </table>
         </div>
       </section>
+
+      <Modal
+        isOpen={editingMotor !== null}
+        onClose={() => setEditingMotor(null)}
+        title="Editar motor"
+      >
+        <form onSubmit={handleUpdate} className="grid gap-5">
+          {errorEdicion && (
+            <p
+              role="alert"
+              className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+            >
+              {errorEdicion}
+            </p>
+          )}
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <FormField label="Código interno" icon={<Cog size={16} />}>
+              <input
+                className={controlClass}
+                value={editForm.codigo_interno}
+                onChange={(event) =>
+                  setEditForm({ ...editForm, codigo_interno: event.target.value })
+                }
+                required
+              />
+            </FormField>
+            <FormField label="Número de serie" icon={<Truck size={16} />}>
+              <input
+                className={controlClass}
+                value={editForm.numero_serie}
+                onChange={(event) =>
+                  setEditForm({ ...editForm, numero_serie: event.target.value })
+                }
+                required
+              />
+            </FormField>
+            <FormField label="Fabricante" icon={<Cog size={16} />}>
+              <input
+                className={controlClass}
+                value={editForm.fabricante}
+                onChange={(event) =>
+                  setEditForm({ ...editForm, fabricante: event.target.value })
+                }
+                required
+              />
+            </FormField>
+            <FormField label="Modelo" icon={<Cog size={16} />}>
+              <input
+                className={controlClass}
+                value={editForm.modelo}
+                onChange={(event) =>
+                  setEditForm({ ...editForm, modelo: event.target.value })
+                }
+                required
+              />
+            </FormField>
+            <FormField label="Tipo de motor" icon={<Gauge size={16} />}>
+              <input
+                className={controlClass}
+                value={editForm.tipo_motor}
+                onChange={(event) =>
+                  setEditForm({ ...editForm, tipo_motor: event.target.value })
+                }
+                required
+              />
+            </FormField>
+            <FormField label="Potencia (HP)" icon={<Gauge size={16} />}>
+              <input
+                className={controlClass}
+                type="number"
+                min="1"
+                step="1"
+                value={editForm.potencia_hp}
+                onChange={(event) =>
+                  setEditForm({ ...editForm, potencia_hp: event.target.value })
+                }
+                inputMode="numeric"
+                required
+              />
+            </FormField>
+            <FormField label="Horas de uso" icon={<Gauge size={16} />}>
+              <input
+                className={controlClass}
+                type="number"
+                min="0"
+                step="1"
+                value={editForm.horas_de_uso}
+                onChange={(event) =>
+                  setEditForm({ ...editForm, horas_de_uso: event.target.value })
+                }
+                inputMode="numeric"
+                required
+              />
+            </FormField>
+            <FormField label="Ubicación actual" icon={<MapPin size={16} />}>
+              <input
+                className={controlClass}
+                value={editForm.ubicacion_actual}
+                onChange={(event) =>
+                  setEditForm({ ...editForm, ubicacion_actual: event.target.value })
+                }
+                required
+              />
+            </FormField>
+            <div className="sm:col-span-2">
+              <FormField
+                label="Cliente propietario"
+                icon={<UsersRound size={16} />}
+              >
+                <select
+                  className={controlClass}
+                  value={editForm.cliente_propietario_id}
+                  onChange={(event) =>
+                    setEditForm({
+                      ...editForm,
+                      cliente_propietario_id: event.target.value,
+                    })
+                  }
+                  required
+                  disabled={cargando || clientes.length === 0}
+                >
+                  {clientes.map((cliente) => (
+                    <option key={cliente.id} value={cliente.id}>
+                      {cliente.razon_social} — {cliente.numero_identificacion}
+                    </option>
+                  ))}
+                </select>
+              </FormField>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
+            <button
+              type="button"
+              onClick={() => setEditingMotor(null)}
+              className="rounded-lg border border-gray-300 px-4 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-blue-600"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={guardandoEdicion || cargando || clientes.length === 0}
+              className="inline-flex min-w-40 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:bg-blue-300"
+            >
+              {guardandoEdicion ? "Guardando..." : "Guardar cambios"}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

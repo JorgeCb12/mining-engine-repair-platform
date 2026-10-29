@@ -25,3 +25,17 @@ def get_by_id(db: Session, motor_id: str) -> models.Motor:
     if not motor:
         raise HTTPException(status_code=404, detail="Motor no encontrado")
     return motor
+
+
+def update(
+    db: Session, motor_id: str, data: schemas.MotorCreate
+) -> models.Motor:
+    motor = get_by_id(db, motor_id)
+    if not cliente_repo.get_by_id(db, data.cliente_propietario_id):
+        raise HTTPException(status_code=404, detail="Cliente propietario no existe")
+    existente = motor_repo.get_by_numero_serie(db, data.numero_serie)
+    if existente and existente.id != motor_id:
+        raise HTTPException(
+            status_code=400, detail="Ya existe un motor con este número de serie"
+        )
+    return motor_repo.update(db, motor, data.model_dump())
