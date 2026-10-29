@@ -15,6 +15,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { businessApi } from "../api/client";
+import { formatLocalDate } from "../utils/formatDate";
 import type { HistorialEstado, Orden } from "../types";
 
 const estados = [
@@ -194,7 +195,7 @@ export const DetalleOrden = () => {
                     Fecha de recepción
                   </p>
                   <p className="text-sm font-semibold text-gray-800">
-                    {new Date(orden.fecha_recepcion).toLocaleDateString()}
+                    {formatLocalDate(orden.fecha_recepcion)}
                   </p>
                 </div>
                 <div className="rounded-xl bg-gray-50 p-4 sm:col-span-2">
@@ -289,7 +290,7 @@ export const DetalleOrden = () => {
                                 aria-hidden="true"
                                 className="text-gray-400"
                               />
-                              {new Date(cambio.timestamp).toLocaleString()}
+                              {formatLocalDate(cambio.timestamp)}
                             </span>
                           </td>
                         </tr>

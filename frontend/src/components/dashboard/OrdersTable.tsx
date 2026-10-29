@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import type { Orden } from "../../types";
+import { formatLocalDate } from "../../utils/formatDate";
 
 interface OrdersTableProps {
   ordenes: Orden[];
@@ -77,7 +78,7 @@ export const OrdersTable = ({ ordenes, isLoading }: OrdersTableProps) => (
                   {orden.descripcion_falla}
                 </td>
                 <td className={`${tableCell} whitespace-nowrap text-gray-500`}>
-                  {new Date(orden.fecha_recepcion).toLocaleDateString()}
+                  {formatLocalDate(orden.fecha_recepcion)}
                 </td>
                 <td className={tableCell}>
                   <Link

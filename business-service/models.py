@@ -1,5 +1,5 @@
 from sqlalchemy import Column, String, Boolean, DateTime, Integer, ForeignKey
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 from database import Base
 
@@ -19,8 +19,12 @@ class Cliente(Base):
     contacto_telefono = Column(String, nullable=False)
     ubicacion = Column(String, nullable=False)
     estado_activo = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
 
 
 class Motor(Base):
@@ -40,8 +44,12 @@ class Motor(Base):
         String, ForeignKey("business.clientes.id"), nullable=False
     )
     estado_activo = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
 
 
 class OrdenReparacion(Base):
@@ -61,11 +69,15 @@ class OrdenReparacion(Base):
     costo_estimado = Column(
         String, nullable=True
     )  # Puedes usar Float/Numeric si prefieres
-    fecha_recepcion = Column(DateTime, default=datetime.utcnow)
+    fecha_recepcion = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     fecha_estimada_entrega = Column(DateTime, nullable=True)
     usuario_asignado_id = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
 
 
 class HistorialEstado(Base):
@@ -80,4 +92,4 @@ class HistorialEstado(Base):
     estado_nuevo = Column(String, nullable=False)
     usuario_id = Column(String, nullable=False)
     comentario = Column(String, nullable=True)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))
