@@ -31,7 +31,7 @@ export const Login = () => {
         email,
         password,
       });
-      login(res.data.access_token, res.data.user);
+      login(res.data.access_token);
       navigate("/dashboard");
     } catch {
       setError(
