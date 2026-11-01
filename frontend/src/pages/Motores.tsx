@@ -99,7 +99,7 @@ export const Motores = () => {
   const [editForm, setEditForm] = useState<MotorForm>(initialForm);
   const [busqueda, setBusqueda] = useState("");
   const [cargando, setCargando] = useState(true);
-  const [creando, setCreando] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [guardandoEdicion, setGuardandoEdicion] = useState(false);
   const [formAbierto, setFormAbierto] = useState(true);
   const [error, setError] = useState("");
@@ -214,7 +214,7 @@ export const Motores = () => {
 
   const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setCreando(true);
+    setIsSubmitting(true);
     setError("");
     setMensaje("");
 
@@ -241,7 +241,7 @@ export const Motores = () => {
         "No se pudo crear el motor. Verifica los datos, el cliente y que el número de serie no esté registrado.",
       );
     } finally {
-      setCreando(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -469,10 +469,10 @@ export const Motores = () => {
               </p>
               <button
                 type="submit"
-                disabled={creando || cargando || clientes.length === 0}
-                className="inline-flex min-w-40 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:translate-y-0 disabled:cursor-not-allowed disabled:bg-blue-300 disabled:shadow-none"
+                disabled={isSubmitting || cargando || clientes.length === 0}
+                className="inline-flex min-w-40 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-blue-300 disabled:shadow-none"
               >
-                {creando ? "Guardando..." : <><Plus size={17} /> Crear motor</>}
+                {isSubmitting ? "Guardando..." : <><Plus size={17} /> Crear motor</>}
               </button>
             </div>
           </form>
@@ -739,7 +739,7 @@ export const Motores = () => {
             <button
               type="submit"
               disabled={guardandoEdicion || cargando || clientes.length === 0}
-              className="inline-flex min-w-40 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:bg-blue-300"
+              className="inline-flex min-w-40 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-blue-300"
             >
               {guardandoEdicion ? "Guardando..." : "Guardar cambios"}
             </button>

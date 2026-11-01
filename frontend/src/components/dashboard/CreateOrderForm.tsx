@@ -1,7 +1,7 @@
 import {
   useState,
   type Dispatch,
-  type FormEventHandler,
+  type FormEvent,
   type ReactNode,
   type SetStateAction,
 } from "react";
@@ -29,7 +29,7 @@ interface CreateOrderFormProps {
   motores: Motor[];
   form: OrderFormData;
   setForm: Dispatch<SetStateAction<OrderFormData>>;
-  onCreateOrder: FormEventHandler<HTMLFormElement>;
+  onCreateOrder: (event: FormEvent<HTMLFormElement>) => Promise<void>;
   isCreating: boolean;
   isLoading: boolean;
 }
@@ -63,9 +63,19 @@ export const CreateOrderForm = ({
   isLoading,
 }: CreateOrderFormProps) => {
   const [isExpanded, setIsExpanded] = useState(true);
-  const isDisabled = isCreating || isLoading;
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isDisabled = isCreating || isSubmitting || isLoading;
   const isSubmitDisabled =
     isDisabled || clientes.length === 0 || motores.length === 0;
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    setIsSubmitting(true);
+    try {
+      await onCreateOrder(event);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
@@ -102,7 +112,7 @@ export const CreateOrderForm = ({
       {isExpanded && (
         <form
           id="create-order-form"
-          onSubmit={onCreateOrder}
+          onSubmit={handleSubmit}
           className="grid gap-5 p-5 sm:p-6"
         >
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -223,9 +233,9 @@ export const CreateOrderForm = ({
             <button
               type="submit"
               disabled={isSubmitDisabled}
-              className="inline-flex min-w-40 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:translate-y-0 disabled:cursor-not-allowed disabled:bg-blue-300 disabled:shadow-none"
+              className="inline-flex min-w-40 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-blue-300 disabled:shadow-none"
             >
-              {isCreating ? (
+              {isSubmitting || isCreating ? (
                 <>
                   <LoaderCircle
                     size={17}

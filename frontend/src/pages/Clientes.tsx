@@ -94,7 +94,7 @@ export const Clientes = () => {
   const [editForm, setEditForm] = useState<ClienteForm>(initialForm);
   const [busqueda, setBusqueda] = useState("");
   const [cargando, setCargando] = useState(true);
-  const [creando, setCreando] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [guardandoEdicion, setGuardandoEdicion] = useState(false);
   const [formAbierto, setFormAbierto] = useState(true);
   const [error, setError] = useState("");
@@ -194,7 +194,7 @@ export const Clientes = () => {
 
   const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setCreando(true);
+    setIsSubmitting(true);
     setError("");
     setMensaje("");
 
@@ -216,7 +216,7 @@ export const Clientes = () => {
         "No se pudo crear el cliente. Comprueba los datos y que el número de identificación no esté registrado.",
       );
     } finally {
-      setCreando(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -428,10 +428,10 @@ export const Clientes = () => {
               </p>
               <button
                 type="submit"
-                disabled={creando || cargando}
-                className="inline-flex min-w-40 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:translate-y-0 disabled:cursor-not-allowed disabled:bg-blue-300 disabled:shadow-none"
+                disabled={isSubmitting || cargando}
+                className="inline-flex min-w-40 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-blue-300 disabled:shadow-none"
               >
-                {creando ? "Guardando..." : <><Plus size={17} /> Crear cliente</>}
+                {isSubmitting ? "Guardando..." : <><Plus size={17} /> Crear cliente</>}
               </button>
             </div>
           </form>
@@ -679,7 +679,7 @@ export const Clientes = () => {
             <button
               type="submit"
               disabled={guardandoEdicion}
-              className="inline-flex min-w-40 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:bg-blue-300"
+              className="inline-flex min-w-40 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-blue-300"
             >
               {guardandoEdicion ? "Guardando..." : "Guardar cambios"}
             </button>

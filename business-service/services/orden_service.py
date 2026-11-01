@@ -5,10 +5,25 @@ import models
 import schemas
 from repositories import motor_repo, orden_repo
 
+TRANSICIONES_VALIDAS = {
+    "recibido": ["en_diagnostico"],
+    "en_diagnostico": ["esperando_aprobacion", "en_reparacion"],
+    "esperando_aprobacion": ["en_reparacion"],
+    "en_reparacion": ["en_pruebas"],
+    "en_pruebas": ["finalizado"],
+    "finalizado": ["entregado"],
+    "entregado": [],
+}
+
 
 def create(db: Session, data: schemas.OrdenCreate) -> models.OrdenReparacion:
     if not motor_repo.get_by_id(db, data.motor_id):
         raise HTTPException(status_code=404, detail="Motor no encontrado")
+    if orden_repo.get_orden_activa_by_motor(db, data.motor_id):
+        raise HTTPException(
+            status_code=400,
+            detail="Este motor ya tiene una orden de reparación activa",
+        )
     numero_orden = f"ORD-{orden_repo.get_count(db) + 1:04d}"
     orden = models.OrdenReparacion(numero_orden=numero_orden, **data.model_dump())
     return orden_repo.create(db, orden)
@@ -26,6 +41,9 @@ def change_status(
         raise HTTPException(status_code=404, detail="Orden no encontrada")
 
     estado_anterior = orden.estado_actual
+    if data.estado_nuevo not in TRANSICIONES_VALIDAS.get(estado_anterior, []):
+        raise HTTPException(status_code=400, detail="Transición de estado no válida")
+
     orden.estado_actual = data.estado_nuevo
     historial = models.HistorialEstado(
         orden_id=orden.id,

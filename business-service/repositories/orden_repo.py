@@ -44,3 +44,16 @@ def get_history(db: Session, orden_id: str) -> list[models.HistorialEstado]:
         .order_by(models.HistorialEstado.timestamp)
         .all()
     )
+
+
+def get_orden_activa_by_motor(
+    db: Session, motor_id: str
+) -> models.OrdenReparacion | None:
+    return (
+        db.query(models.OrdenReparacion)
+        .filter(
+            models.OrdenReparacion.motor_id == motor_id,
+            models.OrdenReparacion.estado_actual.notin_(["finalizado", "entregado"]),
+        )
+        .first()
+    )
