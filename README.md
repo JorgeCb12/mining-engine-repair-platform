@@ -66,6 +66,18 @@ Los servicios se ejecutan como contenedores independientes y se comunican con la
 
 Para más contexto sobre estas decisiones, consulta [Decisiones de Arquitectura y Trade-offs](docs/arquitectura-decisiones.md).
 
+## 🛡️ Security Roadmap & Trade-offs de Arquitectura
+Actualmente, el token JWT se maneja en el frontend decodificándolo del `localStorage` para extraer los roles. Si bien el backend está protegido contra manipulación de roles (validación criptográfica), el almacenamiento en `localStorage` es vulnerable a ataques XSS (Cross-Site Scripting).
+
+**Para un entorno de producción real, el plan de mejora a futuro es:**
+1. **Almacenamiento en Cookies HttpOnly:** Migrar el JWT a cookies con las banderas `HttpOnly`, `Secure` y `SameSite=Strict`. Esto impide que scripts maliciosos (XSS) accedan al token.
+2. **Centralización con API Gateway:** Implementar un API Gateway (ej. Nginx) para unificar los microservicios bajo un mismo dominio, facilitando el manejo de cookies y centralizando la validación del JWT.
+3. **Refresco de Tokens (Refresh Tokens):** Implementar un sistema de Refresh Tokens para evitar que el usuario tenga que loguearse cada vez que expire el Access Token.
+
+**Trade-off de Microservicios y Datos:**
+- Se usó una sola instancia de PostgreSQL (Supabase) con dos esquemas lógicos (`public` y `business`) para garantizar el aislamiento de responsabilidades sin incurrir en latencia de red entre bases de datos.
+- La validación del JWT es descentralizada (HS256) para mantener los servicios stateless y evitar un punto único de fallo (SPOF).
+
 ## Requisitos
 
 - Git
