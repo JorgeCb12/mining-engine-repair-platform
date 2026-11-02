@@ -18,7 +18,7 @@ MineRepair es un sistema de microservicios para gestionar reparaciones de motore
   </tr>
   <tr>
     <td width="50%"><img src="./docs/screenshots/cap-usuarios.png" alt="Gestión de Usuarios" width="100%"/></td>
-    <td width="50%"><img src="./docs/screenshots/cap-mobile.png" alt="Vista Móvil" width="100%"/></td>
+    <td width="50%"><img src="./docs/screenshots/cap-mobile.jpeg" alt="Vista Móvil" width="100%"/></td>
   </tr>
 </table>
 
@@ -26,29 +26,30 @@ MineRepair es un sistema de microservicios para gestionar reparaciones de motore
 
 El frontend consume dos APIs independientes: Express se ocupa de autenticación y usuarios; FastAPI ofrece las operaciones del dominio de reparaciones. Ambos servicios se conectan a PostgreSQL alojado en Supabase.
 
-```text
-                         +----------------------+
-                         |  Frontend React/Vite |
-                         |   http://localhost   |
-                         +----------+-----------+
-                                    |
-                  +-----------------+-----------------+
-                  |                                   |
-       +----------v-----------+            +----------v-----------+
-       | Auth API             |            | Business API         |
-       | Node.js + Express    |            | Python + FastAPI     |
-       | JWT, usuarios, RBAC  |            | clientes, motores,   |
-       | :3001                |            | órdenes :8000        |
-       +----------+-----------+            +----------+-----------+
-                  |                                   |
-                  +-----------------+-----------------+
-                                    |
-                         +----------v-----------+
-                         | PostgreSQL           |
-                         | Supabase             |
-                         | esquemas separados   |
-                         +----------------------+
+<div align="center">
+
+```mermaid
+flowchart TD
+    Client([Frontend<br/>React + Vite]) -->|1. Login| Auth[Auth API<br/>Node.js + Express]
+    Auth -->|2. Valida Credenciales| DBAuth[(DB Schema: public)]
+    Auth -.->|3. Retorna JWT| Client
+    
+    Client -->|4. Request + Token| Biz[Business API<br/>Python + FastAPI]
+    Biz -.->|5. Valida JWT| Biz
+    Biz -->|6. CRUD Operaciones| DBBiz[(DB Schema: business)]
+
+    classDef frontend fill:#31E981,stroke:#047857,stroke-width:2px,color:#00120B;
+    classDef auth fill:#6B818C,stroke:#374151,stroke-width:2px,color:#D8E4FF;
+    classDef business fill:#35605A,stroke:#1f3a37,stroke-width:2px,color:#D8E4FF;
+    classDef db fill:#00120B,stroke:#6B818C,stroke-width:2px,color:#31E981;
+    
+    class Client frontend;
+    class Auth auth;
+    class Biz business;
+    class DBAuth,DBBiz db;
 ```
+
+</div>
 
 Los servicios se ejecutan como contenedores independientes y se comunican con la base de datos configurada mediante variables de entorno. La documentación interactiva de FastAPI está disponible en `/docs` cuando el servicio está levantado.
 
