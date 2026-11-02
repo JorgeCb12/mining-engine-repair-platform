@@ -3,9 +3,10 @@ import type { Orden } from "../../types";
 
 interface DashboardStatsProps {
   ordenes: Orden[];
+  isLoading?: boolean;
 }
 
-export const DashboardStats = ({ ordenes }: DashboardStatsProps) => {
+export const DashboardStats = ({ ordenes, isLoading }: DashboardStatsProps) => {
   const enReparacion = ordenes.filter(
     (orden) => orden.estado_actual === "en_reparacion",
   ).length;
@@ -15,30 +16,43 @@ export const DashboardStats = ({ ordenes }: DashboardStatsProps) => {
 
   const stats = [
     {
-      title: "Órdenes totales",
+      title: "Órdenes Totales",
       value: ordenes.length,
       icon: ClipboardList,
-      color: "text-blue-600",
-      iconBg: "bg-blue-50",
-      border: "border-t-blue-500",
+      color: "text-primary",
+      iconBg: "bg-white/5",
+      border: "border-l-4 border-brand-primary",
     },
     {
-      title: "En reparación",
+      title: "En Reparación Activa",
       value: enReparacion,
       icon: Wrench,
-      color: "text-orange-600",
-      iconBg: "bg-orange-50",
-      border: "border-t-orange-500",
+      color: "text-amber-400",
+      iconBg: "bg-white/5",
+      border: "border-l-4 border-amber-500",
     },
     {
-      title: "Finalizadas",
+      title: "Reparaciones Finalizadas",
       value: finalizadas,
       icon: CheckCheck,
-      color: "text-green-600",
-      iconBg: "bg-green-50",
-      border: "border-t-green-500",
+      color: "text-emerald-400",
+      iconBg: "bg-white/5",
+      border: "border-l-4 border-emerald-500",
     },
   ];
+
+  if (isLoading) {
+    return (
+      <section aria-label="Cargando resumen" className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-28 rounded-lg glass-card p-5 animate-pulse">
+            <div className="h-4 w-28 bg-white/10 rounded mb-3" />
+            <div className="h-8 w-16 bg-white/10 rounded" />
+          </div>
+        ))}
+      </section>
+    );
+  }
 
   return (
     <section
@@ -48,17 +62,17 @@ export const DashboardStats = ({ ordenes }: DashboardStatsProps) => {
       {stats.map(({ title, value, icon: Icon, color, iconBg, border }) => (
         <article
           key={title}
-          className={`rounded-2xl border border-gray-200 border-t-4 ${border} bg-white p-5 shadow-sm transition-shadow hover:shadow-md sm:p-6`}
+          className={`rounded-lg glass-card ${border} p-5 transition-shadow hover:shadow-lg sm:p-6`}
         >
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-medium text-gray-500">{title}</p>
-              <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900">
+              <p className="text-xs font-semibold tracking-wider text-muted uppercase">{title}</p>
+              <p className="mt-2 text-3xl font-bold tracking-tight text-app font-mono">
                 {value}
               </p>
             </div>
-            <span className={`grid size-11 place-items-center rounded-xl ${iconBg} ${color}`}>
-              <Icon size={21} aria-hidden="true" />
+            <span className={`grid size-12 shrink-0 place-items-center rounded-lg ${iconBg} ${color}`}>
+              <Icon size={22} aria-hidden="true" />
             </span>
           </div>
         </article>

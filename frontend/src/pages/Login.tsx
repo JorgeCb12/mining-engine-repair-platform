@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Cog, LoaderCircle, LockKeyhole, Mail } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import { authApi } from "../api/client";
 import type { AuthResponse } from "../types";
 import { useAuth } from "../hook/useAuth";
+import logo from "../assets/logo.svg";
 
 export const Login = () => {
   const [isRegister, setIsRegister] = useState(false);
@@ -45,83 +46,63 @@ export const Login = () => {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-10 font-sans text-gray-900">
-      <section className="w-full max-w-md rounded-2xl border border-gray-100 bg-white p-8 shadow-xl shadow-gray-200/60 sm:p-10">
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-5 grid size-14 place-items-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-600/20">
-            <Cog size={28} aria-hidden="true" />
-          </div>
-          <p className="mb-2 text-xs font-bold tracking-[0.18em] text-blue-600 uppercase">
-            MineRepair
-          </p>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">
-            {isRegister ? "Crear cuenta" : "Bienvenido de nuevo"}
+    <main className="min-h-screen w-full flex items-center justify-center bg-app px-4 py-10 font-sans text-app">
+      <section className="w-full max-w-md p-8 sm:p-10 rounded-2xl glass-card relative z-10">
+        <div className="text-center mb-8">
+          <img src={logo} className="w-16 h-16 mx-auto mb-4 drop-shadow-lg" alt="MineRepair Logo" />
+          <h1 className="font-display text-2xl font-bold text-center text-app mb-2">
+            {isRegister ? "Crear Cuenta" : "Acceso al Sistema"}
           </h1>
-          <p className="mt-2 text-sm text-gray-500">
-            {isRegister
-              ? "Completa tus datos para comenzar."
-              : "Inicia sesión para continuar al panel."}
+          <p className="text-center text-muted text-sm mb-8">
+            Ingresa tus credenciales para continuar.
           </p>
         </div>
 
         {error && (
-          <p
-            role="alert"
-            className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-          >
+          <div className="mb-5 bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-lg text-center">
             {error}
-          </p>
+          </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          <label className="block space-y-2 text-sm font-medium text-gray-700">
-            Correo electrónico
-            <span className="relative block">
-              <Mail
-                size={17}
-                aria-hidden="true"
-                className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-gray-400"
-              />
-              <input
-                type="email"
-                placeholder="nombre@empresa.com"
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full rounded-lg border border-gray-300 bg-gray-50 py-3 pr-3 pl-10 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20"
-              />
-            </span>
-          </label>
+          <div>
+            <label className="block text-sm font-medium text-muted mb-1">
+              Correo Electrónico
+            </label>
+            <input
+              type="email"
+              placeholder="operador@minera.com"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-app placeholder:text-muted/50 focus:outline-none focus:ring-1 focus:ring-brand-primary focus:border-brand-primary transition-all"
+            />
+          </div>
 
-          <label className="block space-y-2 text-sm font-medium text-gray-700">
-            Contraseña
-            <span className="relative block">
-              <LockKeyhole
-                size={17}
-                aria-hidden="true"
-                className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-gray-400"
-              />
-              <input
-                type="password"
-                placeholder="Ingresa tu contraseña"
-                autoComplete={isRegister ? "new-password" : "current-password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full rounded-lg border border-gray-300 bg-gray-50 py-3 pr-3 pl-10 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20"
-              />
-            </span>
-          </label>
+          <div>
+            <label className="block text-sm font-medium text-muted mb-1">
+              Contraseña
+            </label>
+            <input
+              type="password"
+              placeholder="••••••••••••"
+              autoComplete={isRegister ? "new-password" : "current-password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-app placeholder:text-muted/50 focus:outline-none focus:ring-1 focus:ring-brand-primary focus:border-brand-primary transition-all"
+            />
+          </div>
 
           <button
             type="submit"
             disabled={isSubmitting}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:bg-blue-300"
+            className="w-full bg-primary text-brand-bg font-bold rounded-lg px-4 py-3 mt-6 hover:opacity-90 transition-all shadow-[0_0_15px_rgba(49,233,129,0.3)] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting && (
               <LoaderCircle
-                size={17}
+                size={18}
                 aria-hidden="true"
                 className="animate-spin"
               />
@@ -129,26 +110,23 @@ export const Login = () => {
             {isSubmitting
               ? "Procesando..."
               : isRegister
-                ? "Crear cuenta"
-                : "Iniciar sesión"}
+                ? "Registrarse"
+                : "Iniciar Sesión"}
           </button>
         </form>
 
-        <div className="mt-7 border-t border-gray-100 pt-5 text-center">
-          <span className="text-sm text-gray-500">
-            {isRegister ? "¿Ya tienes una cuenta?" : "¿Aún no tienes cuenta?"}
-          </span>{" "}
-          <button
-            type="button"
-            onClick={() => {
-              setIsRegister(!isRegister);
-              setError("");
-            }}
-            className="text-sm font-semibold text-blue-600 underline-offset-4 transition hover:text-blue-700 hover:underline focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-blue-600"
-          >
-            {isRegister ? "Inicia sesión" : "Regístrate"}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setIsRegister(!isRegister);
+            setError("");
+          }}
+          className="w-full text-center text-sm text-muted mt-6 hover:text-app transition-colors"
+        >
+          {isRegister
+            ? "¿Ya tienes cuenta? Inicia sesión"
+            : "¿No tienes una cuenta? Regístrate"}
+        </button>
       </section>
     </main>
   );

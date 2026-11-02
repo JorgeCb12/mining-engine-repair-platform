@@ -24,7 +24,7 @@ export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 backdrop-blur-md p-4"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
@@ -33,15 +33,15 @@ export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="my-auto w-full max-w-2xl rounded-xl bg-white p-6 shadow-xl"
+        className="my-auto w-full max-w-2xl rounded-2xl glass-card p-6 shadow-2xl relative z-10"
       >
-        <div className="mb-5 flex items-center justify-between gap-4">
-          <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+        <div className="mb-5 flex items-center justify-between gap-4 border-b border-white/10 pb-4">
+          <h2 className="text-xl font-bold font-display text-app">{title}</h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Cerrar ventana"
-            className="grid size-9 shrink-0 place-items-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-800 focus-visible:outline-2 focus-visible:outline-blue-600"
+            className="grid size-9 shrink-0 place-items-center rounded-lg text-muted transition hover:bg-white/10 hover:text-app focus-visible:outline-2 focus-visible:outline-primary"
           >
             <X size={20} aria-hidden="true" />
           </button>

@@ -11,6 +11,8 @@ import {
   Search,
   UsersRound,
 } from "lucide-react";
+import { toast } from "sonner";
+import { isAxiosError } from "axios";
 import { businessApi } from "../api/client";
 import { Modal } from "../components/ui/Modal";
 import type { Cliente } from "../types";
@@ -23,6 +25,7 @@ interface ClienteForm {
   contacto_email: string;
   contacto_telefono: string;
   ubicacion: string;
+  estado_activo: boolean;
 }
 
 const initialForm: ClienteForm = {
@@ -33,11 +36,12 @@ const initialForm: ClienteForm = {
   contacto_email: "",
   contacto_telefono: "",
   ubicacion: "",
+  estado_activo: true,
 };
 
 const controlClass =
-  "w-full rounded-lg border border-gray-300 bg-gray-50 px-3.5 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20";
-const fieldClass = "grid gap-2 text-sm font-medium text-gray-700";
+  "w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-3 text-sm text-app outline-none transition placeholder:text-muted/50 focus:ring-1 focus:ring-primary focus:border-primary";
+const fieldClass = "grid gap-2 text-xs font-semibold uppercase tracking-wider text-muted";
 
 const FormField = ({
   label,
@@ -49,11 +53,11 @@ const FormField = ({
   children: ReactNode;
 }) => (
   <label className={fieldClass}>
-    <span className="flex items-center gap-2">
-      <span className="text-gray-400" aria-hidden="true">
+    <span className="flex items-center gap-2 text-app">
+      <span className="text-muted" aria-hidden="true">
         {icon}
       </span>
-      {label} <span className="text-red-500">*</span>
+      {label} <span className="text-primary">*</span>
     </span>
     {children}
   </label>
@@ -65,24 +69,26 @@ const StatCard = ({
   icon,
   color,
   iconBackground,
+  border,
 }: {
   label: string;
-  value: number;
+  value: number | string;
   icon: ReactNode;
   color: string;
   iconBackground: string;
+  border: string;
 }) => (
-  <article className="flex flex-1 items-center gap-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-    <span
-      className={`grid size-11 shrink-0 place-items-center rounded-xl ${iconBackground} ${color}`}
-    >
-      {icon}
-    </span>
-    <div>
-      <p className="text-sm font-medium text-gray-500">{label}</p>
-      <p className="mt-1 text-2xl font-bold tracking-tight text-gray-900">
-        {value}
-      </p>
+  <article className={`rounded-lg glass-card ${border} p-5`}>
+    <div className="flex items-center justify-between">
+      <div>
+        <p className="text-xs font-semibold tracking-wider text-muted uppercase">{label}</p>
+        <p className="mt-2 text-3xl font-bold tracking-tight text-app font-mono">
+          {value}
+        </p>
+      </div>
+      <span className={`grid size-12 place-items-center rounded-lg ${iconBackground} ${color}`}>
+        {icon}
+      </span>
     </div>
   </article>
 );
@@ -152,6 +158,7 @@ export const Clientes = () => {
       contacto_email: cliente.contacto_email,
       contacto_telefono: cliente.contacto_telefono,
       ubicacion: cliente.ubicacion,
+      estado_activo: cliente.estado_activo,
     });
     setErrorEdicion("");
     setError("");
@@ -164,8 +171,6 @@ export const Clientes = () => {
 
     setGuardandoEdicion(true);
     setErrorEdicion("");
-    setError("");
-    setMensaje("");
 
     try {
       await businessApi.put<Cliente>(
@@ -173,20 +178,17 @@ export const Clientes = () => {
         editForm,
       );
       setEditingCliente(null);
-      setMensaje("El cliente se actualizó correctamente.");
+      toast.success("Cliente actualizado correctamente");
 
       try {
         const res = await businessApi.get<Cliente[]>("/clientes/");
         setClientes(res.data);
       } catch {
-        setError(
-          "El cliente se actualizó, pero no se pudo actualizar la lista. Recarga la página para ver los cambios.",
-        );
+        toast.error("El cliente se actualizó, pero no se pudo actualizar la lista.");
       }
-    } catch {
-      setErrorEdicion(
-        "No se pudo actualizar el cliente. Comprueba los datos y que el número de identificación no esté registrado en otro cliente.",
-      );
+    } catch (err: unknown) {
+      const msg = isAxiosError(err) ? (err.response?.data?.detail as string) : undefined;
+      toast.error(msg || "Error al actualizar el cliente");
     } finally {
       setGuardandoEdicion(false);
     }
@@ -195,41 +197,37 @@ export const Clientes = () => {
   const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsSubmitting(true);
-    setError("");
-    setMensaje("");
 
     try {
       await businessApi.post<Cliente>("/clientes/", form);
       setForm(initialForm);
-      setMensaje("El cliente se creó correctamente.");
+      toast.success("Cliente creado exitosamente");
 
       try {
         const res = await businessApi.get<Cliente[]>("/clientes/");
         setClientes(res.data);
       } catch {
-        setError(
-          "El cliente se creó, pero no se pudo actualizar la lista. Recarga la página para ver los cambios.",
-        );
+        toast.error("El cliente se creó, pero no se pudo actualizar la lista.");
       }
-    } catch {
-      setError(
-        "No se pudo crear el cliente. Comprueba los datos y que el número de identificación no esté registrado.",
-      );
+    } catch (err: unknown) {
+      const msg = isAxiosError(err) ? (err.response?.data?.detail as string) : undefined;
+      toast.error(msg || "Error al procesar la solicitud");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 font-sans text-gray-900 sm:px-6 lg:px-8">
-      <header>
-        <p className="text-xs font-bold tracking-[0.16em] text-blue-600 uppercase">
-          Gestión comercial
-        </p>
-        <h1 className="mt-1 text-3xl font-bold tracking-tight">Clientes</h1>
-        <p className="mt-2 text-sm text-gray-500">
-          Administra la información de tus clientes y sus contactos.
-        </p>
+    <div className="space-y-6">
+      <header className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-app font-display">
+            Directorio de Clientes
+          </h1>
+          <p className="mt-1 text-sm text-muted">
+            Gestión y registro de cuentas corporativas para reparaciones mineras.
+          </p>
+        </div>
       </header>
 
       {(error || mensaje) && (
@@ -251,42 +249,47 @@ export const Clientes = () => {
         className="grid grid-cols-1 gap-4 sm:grid-cols-3"
       >
         <StatCard
-          label="Total de clientes"
-          value={clientes.length}
-          icon={<UsersRound size={21} aria-hidden="true" />}
-          color="text-blue-600"
-          iconBackground="bg-blue-50"
+          label="Total Clientes"
+          value={cargando ? "—" : clientes.length}
+          icon={<UsersRound size={22} aria-hidden="true" />}
+          color="text-primary"
+          iconBackground="bg-primary/10"
+          border="border-l-4 border-brand-primary"
         />
         <StatCard
-          label="Clientes activos"
-          value={clientesActivos}
-          icon={<Check size={21} aria-hidden="true" />}
-          color="text-green-600"
-          iconBackground="bg-green-50"
+          label="Clientes Activos"
+          value={cargando ? "—" : clientesActivos}
+          icon={<Check size={22} aria-hidden="true" />}
+          color="text-emerald-400"
+          iconBackground="bg-emerald-500/10"
+          border="border-l-4 border-emerald-500"
         />
         <StatCard
           label="Inactivos"
-          value={clientes.length - clientesActivos}
-          icon={<Building2 size={21} aria-hidden="true" />}
-          color="text-amber-600"
-          iconBackground="bg-amber-50"
+          value={cargando ? "—" : clientes.length - clientesActivos}
+          icon={<Building2 size={22} aria-hidden="true" />}
+          color="text-amber-400"
+          iconBackground="bg-amber-500/10"
+          border="border-l-4 border-amber-500"
         />
       </section>
 
-      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+      <section className="overflow-hidden rounded-lg glass-card">
         <div
-          className={`flex items-center justify-between gap-4 px-5 py-4 sm:px-6 ${
-            formAbierto ? "border-b border-gray-100" : ""
+          className={`flex items-center justify-between gap-4 bg-white/5 px-5 py-4 sm:px-6 ${
+            formAbierto ? "border-b border-white/10" : ""
           }`}
         >
           <div className="flex items-center gap-3">
-            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600">
-              <Plus size={20} aria-hidden="true" />
+            <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-white/5 text-primary font-bold">
+              <Plus size={20} strokeWidth={2.5} aria-hidden="true" />
             </span>
             <div>
-              <h2 className="font-semibold text-gray-900">Registrar cliente</h2>
-              <p className="mt-0.5 text-sm text-gray-500">
-                Completa la información para darlo de alta.
+              <h2 className="text-sm font-bold uppercase tracking-wide text-app">
+                Registrar Nuevo Cliente
+              </h2>
+              <p className="mt-0.5 text-xs text-muted">
+                Ingrese los datos fiscales y de contacto para dar de alta la cuenta.
               </p>
             </div>
           </div>
@@ -295,7 +298,7 @@ export const Clientes = () => {
             onClick={() => setFormAbierto((abierto) => !abierto)}
             aria-expanded={formAbierto}
             aria-label={formAbierto ? "Ocultar formulario" : "Mostrar formulario"}
-            className="grid size-9 shrink-0 place-items-center rounded-lg border border-gray-200 text-gray-500 transition hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-blue-600"
+            className="grid size-9 shrink-0 place-items-center rounded-lg border border-white/20 bg-transparent text-app transition hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-primary"
           >
             <ChevronDown
               size={18}
@@ -306,7 +309,7 @@ export const Clientes = () => {
         </div>
 
         {formAbierto && (
-          <form onSubmit={handleCreate} className="grid gap-5 p-5 sm:p-6">
+          <form onSubmit={handleCreate} className="grid gap-5 p-5 sm:p-6 bg-transparent">
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <FormField label="Razón social" icon={<Building2 size={16} />}>
                 <input
@@ -325,23 +328,26 @@ export const Clientes = () => {
                 label="Tipo de identificación"
                 icon={<UsersRound size={16} />}
               >
-                <select
-                  className={controlClass}
-                  value={form.tipo_identificacion}
-                  onChange={(event) =>
-                    setForm({
-                      ...form,
-                      tipo_identificacion: event.target.value,
-                    })
-                  }
-                  required
-                >
-                  <option value="RUT">RUT</option>
-                  <option value="RUC">RUC</option>
-                  <option value="NIT">NIT</option>
-                  <option value="DNI">DNI</option>
-                  <option value="Otro">Otro</option>
-                </select>
+                <div className="relative">
+                  <select
+                    className={`${controlClass} appearance-none pr-10`}
+                    value={form.tipo_identificacion}
+                    onChange={(event) =>
+                      setForm({
+                        ...form,
+                        tipo_identificacion: event.target.value,
+                      })
+                    }
+                    required
+                  >
+                    <option value="RUT" className="bg-slate-900 text-slate-200 py-2">RUT</option>
+                    <option value="RUC" className="bg-slate-900 text-slate-200 py-2">RUC</option>
+                    <option value="NIT" className="bg-slate-900 text-slate-200 py-2">NIT</option>
+                    <option value="DNI" className="bg-slate-900 text-slate-200 py-2">DNI</option>
+                    <option value="Otro" className="bg-slate-900 text-slate-200 py-2">Otro</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" size={16} />
+                </div>
               </FormField>
 
               <FormField
@@ -422,54 +428,54 @@ export const Clientes = () => {
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-4">
-              <p className="text-xs text-gray-400">
-                <span className="text-red-500">*</span> Campos obligatorios
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-4">
+              <p className="text-xs text-muted">
+                <span className="text-primary">*</span> Campos obligatorios
               </p>
               <button
                 type="submit"
                 disabled={isSubmitting || cargando}
-                className="inline-flex min-w-40 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-blue-300 disabled:shadow-none"
+                className="inline-flex min-w-44 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-brand-bg shadow-sm transition hover:bg-opacity-90 focus-visible:outline-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:bg-white/5 disabled:text-muted"
               >
-                {isSubmitting ? "Guardando..." : <><Plus size={17} /> Crear cliente</>}
+                {isSubmitting ? "Registrando..." : <><Plus size={16} /> Crear cliente</>}
               </button>
             </div>
           </form>
         )}
       </section>
 
-      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex flex-col justify-between gap-4 border-b border-gray-100 px-5 py-4 sm:flex-row sm:items-center sm:px-6">
+      <section className="overflow-hidden rounded-lg glass-card">
+        <div className="flex flex-col justify-between gap-4 border-b border-white/10 bg-white/5 px-5 py-4 sm:flex-row sm:items-center sm:px-6">
           <div>
-            <h2 className="font-semibold text-gray-900">Directorio de clientes</h2>
-            <p className="mt-0.5 text-sm text-gray-500">
+            <h2 className="text-sm font-bold uppercase tracking-wide text-app">Directorio de Clientes</h2>
+            <p className="mt-0.5 text-xs text-muted">
               {clientesFiltrados.length}{" "}
-              {clientesFiltrados.length === 1 ? "resultado" : "resultados"}
+              {clientesFiltrados.length === 1 ? "resultado encontrado" : "resultados encontrados"}
             </p>
           </div>
-          <label className="flex min-h-11 w-full items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 text-gray-400 shadow-sm transition focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 sm:max-w-xs">
-            <Search size={17} aria-hidden="true" />
+          <label className="flex min-h-10 w-full items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-muted shadow-sm transition focus-within:ring-1 focus-within:ring-primary focus-within:border-primary sm:max-w-xs">
+            <Search size={16} aria-hidden="true" />
             <input
               type="search"
               value={busqueda}
               onChange={(event) => setBusqueda(event.target.value)}
-              placeholder="Buscar cliente..."
+              placeholder="Buscar por nombre o RUT..."
               aria-label="Buscar clientes"
-              className="w-full bg-transparent py-2 text-sm text-gray-800 outline-none placeholder:text-gray-400"
+              className="w-full bg-transparent py-1.5 text-xs text-app outline-none placeholder:text-muted/50"
             />
           </label>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-white/10">
+            <thead className="bg-transparent">
               <tr>
                 {["Cliente", "Identificación", "Contacto", "Ubicación", "Estado", "Acciones"].map(
                   (heading) => (
                     <th
                       key={heading}
                       scope="col"
-                      className="whitespace-nowrap px-5 py-3 text-left text-xs font-semibold tracking-wide text-gray-500 uppercase"
+                      className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold tracking-wider text-muted uppercase border-b border-white/10"
                     >
                       {heading}
                     </th>
@@ -477,70 +483,81 @@ export const Clientes = () => {
                 )}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 bg-white">
+            <tbody className="divide-y divide-white/5 bg-transparent">
               {cargando ? (
-                <tr>
-                  <td colSpan={6} className="px-5 py-12 text-center text-sm text-gray-500">
-                    Cargando clientes...
-                  </td>
-                </tr>
+                Array.from({ length: 4 }).map((_, index) => (
+                  <tr key={index} className="bg-transparent">
+                    <td className="px-4 py-3"><div className="h-4 w-36 bg-white/10 rounded animate-pulse" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-24 bg-white/10 rounded animate-pulse" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-40 bg-white/10 rounded animate-pulse" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-28 bg-white/10 rounded animate-pulse" /></td>
+                    <td className="px-4 py-3"><div className="h-5 w-16 bg-white/10 rounded-full animate-pulse" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-16 bg-white/10 rounded animate-pulse" /></td>
+                  </tr>
+                ))
               ) : clientesFiltrados.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-5 py-12 text-center text-sm text-gray-500">
-                    {busqueda
-                      ? "No encontramos clientes con esa búsqueda."
-                      : "Aún no hay clientes registrados."}
+                  <td colSpan={6} className="px-5 py-16 text-center">
+                    <div className="mx-auto flex flex-col items-center justify-center">
+                      <UsersRound size={48} className="text-muted mb-3" aria-hidden="true" />
+                      <p className="text-base font-semibold text-app">No se encontraron clientes</p>
+                      <p className="mt-1 text-xs text-muted">
+                        {busqueda
+                          ? "Intenta con otros términos de búsqueda."
+                          : "Registra tu primer cliente usando el formulario superior."}
+                      </p>
+                    </div>
                   </td>
                 </tr>
               ) : (
                 clientesFiltrados.map((cliente) => (
                   <tr
                     key={cliente.id}
-                    className="transition-colors hover:bg-gray-50"
+                    className="transition-colors hover:bg-white/5"
                   >
-                    <td className="whitespace-nowrap px-5 py-4 text-sm font-semibold text-gray-900">
+                    <td className="whitespace-nowrap px-4 py-3 text-sm font-bold text-app">
                       {cliente.razon_social}
                     </td>
-                    <td className="whitespace-nowrap px-5 py-4 text-sm text-gray-600">
-                      <span className="text-gray-400">
+                    <td className="whitespace-nowrap px-4 py-3 text-xs text-muted">
+                      <span className="font-semibold text-app">
                         {cliente.tipo_identificacion}
                       </span>{" "}
-                      {cliente.numero_identificacion}
+                      <span className="font-mono">{cliente.numero_identificacion}</span>
                     </td>
-                    <td className="min-w-52 px-5 py-4 text-sm">
-                      <p className="font-medium text-gray-800">
+                    <td className="min-w-52 px-4 py-3 text-xs">
+                      <p className="font-semibold text-app">
                         {cliente.contacto_nombre}
                       </p>
                       <a
                         href={`mailto:${cliente.contacto_email}`}
-                        className="mt-1 block text-xs text-gray-500 hover:text-blue-600 hover:underline"
+                        className="mt-0.5 block text-muted hover:text-app hover:underline"
                       >
                         {cliente.contacto_email}
                       </a>
                     </td>
-                    <td className="whitespace-nowrap px-5 py-4 text-sm text-gray-600">
+                    <td className="whitespace-nowrap px-4 py-3 text-xs text-muted">
                       {cliente.ubicacion}
                     </td>
-                    <td className="px-5 py-4">
+                    <td className="px-4 py-3">
                       <span
-                        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${
+                        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                           cliente.estado_activo
-                            ? "bg-green-100 text-green-800"
-                            : "bg-gray-100 text-gray-600"
+                            ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                            : "border border-white/10 bg-white/5 text-muted"
                         }`}
                       >
                         <span className="size-1.5 rounded-full bg-current" aria-hidden="true" />
                         {cliente.estado_activo ? "Activo" : "Inactivo"}
                       </span>
                     </td>
-                    <td className="px-5 py-4">
+                    <td className="px-4 py-3">
                       <button
                         type="button"
                         onClick={() => handleEdit(cliente)}
                         aria-label={`Editar ${cliente.razon_social}`}
-                        className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-2 focus-visible:outline-blue-600"
+                        className="inline-flex items-center gap-1.5 rounded border border-white/20 bg-transparent px-2.5 py-1.5 text-xs font-semibold text-app transition hover:bg-white/5 hover:border-primary hover:text-primary"
                       >
-                        <Pencil size={15} aria-hidden="true" />
+                        <Pencil size={13} aria-hidden="true" />
                         Editar
                       </button>
                     </td>
@@ -582,23 +599,26 @@ export const Clientes = () => {
               label="Tipo de identificación"
               icon={<UsersRound size={16} />}
             >
-              <select
-                className={controlClass}
-                value={editForm.tipo_identificacion}
-                onChange={(event) =>
-                  setEditForm({
-                    ...editForm,
-                    tipo_identificacion: event.target.value,
-                  })
-                }
-                required
-              >
-                <option value="RUT">RUT</option>
-                <option value="RUC">RUC</option>
-                <option value="NIT">NIT</option>
-                <option value="DNI">DNI</option>
-                <option value="Otro">Otro</option>
-              </select>
+              <div className="relative">
+                <select
+                  className={`${controlClass} appearance-none pr-10`}
+                  value={editForm.tipo_identificacion}
+                  onChange={(event) =>
+                    setEditForm({
+                      ...editForm,
+                      tipo_identificacion: event.target.value,
+                    })
+                  }
+                  required
+                >
+                  <option value="RUT" className="bg-slate-900 text-slate-200 py-2">RUT</option>
+                  <option value="RUC" className="bg-slate-900 text-slate-200 py-2">RUC</option>
+                  <option value="NIT" className="bg-slate-900 text-slate-200 py-2">NIT</option>
+                  <option value="DNI" className="bg-slate-900 text-slate-200 py-2">DNI</option>
+                  <option value="Otro" className="bg-slate-900 text-slate-200 py-2">Otro</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" size={16} />
+              </div>
             </FormField>
             <FormField
               label="Número de identificación"
@@ -667,19 +687,34 @@ export const Clientes = () => {
                 />
               </FormField>
             </div>
+
+            <div className="sm:col-span-2 flex items-center gap-3 pt-2">
+              <input
+                type="checkbox"
+                id="edit_estado_activo"
+                checked={editForm.estado_activo}
+                onChange={(event) =>
+                  setEditForm({ ...editForm, estado_activo: event.target.checked })
+                }
+                className="size-4 rounded border-white/20 bg-app text-primary focus:ring-primary accent-emerald-500"
+              />
+              <label htmlFor="edit_estado_activo" className="text-xs font-semibold uppercase tracking-wider text-muted cursor-pointer select-none">
+                Cliente Activo
+              </label>
+            </div>
           </div>
-          <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
+          <div className="flex justify-end gap-3 border-t border-white/10 pt-4">
             <button
               type="button"
               onClick={() => setEditingCliente(null)}
-              className="rounded-lg border border-gray-300 px-4 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-blue-600"
+              className="rounded-lg border border-white/20 bg-transparent px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-app transition hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-primary"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={guardandoEdicion}
-              className="inline-flex min-w-40 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-blue-300"
+              className="inline-flex min-w-40 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-brand-bg shadow-sm transition hover:bg-opacity-95 focus-visible:outline-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:bg-white/5 disabled:text-muted"
             >
               {guardandoEdicion ? "Guardando..." : "Guardar cambios"}
             </button>

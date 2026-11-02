@@ -11,6 +11,7 @@ class ClienteBase(BaseModel):
     contacto_email: str
     contacto_telefono: str
     ubicacion: str
+    estado_activo: bool = True
 
 
 class ClienteCreate(ClienteBase):
@@ -36,6 +37,7 @@ class MotorBase(BaseModel):
     horas_de_uso: int = 0
     ubicacion_actual: str
     cliente_propietario_id: str
+    estado_activo: bool = True
 
 
 class MotorCreate(MotorBase):
