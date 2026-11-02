@@ -9,6 +9,19 @@
 
 MineRepair es un sistema de microservicios para gestionar reparaciones de motores de minería pesada. Centraliza el registro de clientes y motores, la creación y seguimiento de órdenes y el control de acceso según roles, desde una interfaz web adaptable.
 
+## 📸 Capturas de Pantalla (Screenshots)
+
+<table>
+  <tr>
+    <td width="50%"><img src="./docs/screenshots/cap-ordenes.png" alt="Dashboard de Órdenes" width="100%"/></td>
+    <td width="50%"><img src="./docs/screenshots/cap-clientes.png" alt="Directorio de Clientes" width="100%"/></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="./docs/screenshots/cap-usuarios.png" alt="Gestión de Usuarios" width="100%"/></td>
+    <td width="50%"><img src="./docs/screenshots/cap-mobile.png" alt="Vista Móvil" width="100%"/></td>
+  </tr>
+</table>
+
 ## Arquitectura
 
 El frontend consume dos APIs independientes: Express se ocupa de autenticación y usuarios; FastAPI ofrece las operaciones del dominio de reparaciones. Ambos servicios se conectan a PostgreSQL alojado en Supabase.
@@ -41,13 +54,13 @@ Los servicios se ejecutan como contenedores independientes y se comunican con la
 
 ## Stack tecnológico
 
-| Área | Tecnologías |
-| --- | --- |
-| Frontend | React 19, TypeScript, Vite, Tailwind CSS, React Router, Axios |
-| Autenticación | Node.js 20, Express 5, TypeScript, Prisma, JWT, Zod |
-| Lógica de negocio | Python 3.12, FastAPI, Pydantic, SQLAlchemy |
-| Persistencia | PostgreSQL en Supabase; Prisma para autenticación y SQLAlchemy para el dominio de negocio |
-| DevOps | Docker, Docker Compose, GitHub Actions |
+| Área              | Tecnologías                                                                               |
+| ----------------- | ----------------------------------------------------------------------------------------- |
+| Frontend          | React 19, TypeScript, Vite, Tailwind CSS, React Router, Axios                             |
+| Autenticación     | Node.js 20, Express 5, TypeScript, Prisma, JWT, Zod                                       |
+| Lógica de negocio | Python 3.12, FastAPI, Pydantic, SQLAlchemy                                                |
+| Persistencia      | PostgreSQL en Supabase; Prisma para autenticación y SQLAlchemy para el dominio de negocio |
+| DevOps            | Docker, Docker Compose, GitHub Actions                                                    |
 
 ## Características principales
 
@@ -67,14 +80,17 @@ Los servicios se ejecutan como contenedores independientes y se comunican con la
 Para más contexto sobre estas decisiones, consulta [Decisiones de Arquitectura y Trade-offs](docs/arquitectura-decisiones.md).
 
 ## 🛡️ Security Roadmap & Trade-offs de Arquitectura
+
 Actualmente, el token JWT se maneja en el frontend decodificándolo del `localStorage` para extraer los roles. Si bien el backend está protegido contra manipulación de roles (validación criptográfica), el almacenamiento en `localStorage` es vulnerable a ataques XSS (Cross-Site Scripting).
 
 **Para un entorno de producción real, el plan de mejora a futuro es:**
+
 1. **Almacenamiento en Cookies HttpOnly:** Migrar el JWT a cookies con las banderas `HttpOnly`, `Secure` y `SameSite=Strict`. Esto impide que scripts maliciosos (XSS) accedan al token.
 2. **Centralización con API Gateway:** Implementar un API Gateway (ej. Nginx) para unificar los microservicios bajo un mismo dominio, facilitando el manejo de cookies y centralizando la validación del JWT.
 3. **Refresco de Tokens (Refresh Tokens):** Implementar un sistema de Refresh Tokens para evitar que el usuario tenga que loguearse cada vez que expire el Access Token.
 
 **Trade-off de Microservicios y Datos:**
+
 - Se usó una sola instancia de PostgreSQL (Supabase) con dos esquemas lógicos (`public` y `business`) para garantizar el aislamiento de responsabilidades sin incurrir en latencia de red entre bases de datos.
 - La validación del JWT es descentralizada (HS256) para mantener los servicios stateless y evitar un punto único de fallo (SPOF).
 
@@ -108,7 +124,6 @@ La ejecución con Docker no requiere instalar Node.js ni Python en el host.
    ```
 
 3. Edita `.env` y configura los datos reales de tu entorno. Como mínimo, revisa:
-
    - `DATABASE_URL`: conexión PostgreSQL usada por el servicio de autenticación.
    - `DIRECT_URL`: conexión directa usada por Prisma para tareas que no deben pasar por el pooler.
    - `BUSINESS_DATABASE_URL`: conexión PostgreSQL usada por FastAPI.
