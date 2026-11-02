@@ -198,44 +198,6 @@ export const Layout = () => {
           </div>
         </header>
 
-        {/* Mobile nav bar horizontal */}
-        <nav
-          aria-label="Navegación móvil"
-          className="flex items-center gap-1 overflow-x-auto border-b border-white/5 bg-brand-bg/60 backdrop-blur-xl px-4 py-2 lg:hidden"
-        >
-          {links.map(({ to, label, Icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              className={({ isActive }) =>
-                `inline-flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-xs font-medium transition-colors ${
-                  isActive
-                    ? "bg-primary text-brand-bg font-bold"
-                    : "text-muted hover:bg-white/5 hover:text-app"
-                }`
-              }
-            >
-              <Icon size={16} aria-hidden="true" />
-              <span>{label}</span>
-            </NavLink>
-          ))}
-          {isAdmin && (
-            <NavLink
-              to="/usuarios"
-              className={({ isActive }) =>
-                `inline-flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-xs font-medium transition-colors ${
-                  isActive
-                    ? "bg-primary text-brand-bg font-bold"
-                    : "text-muted hover:bg-white/5 hover:text-app"
-                }`
-              }
-            >
-              <UsersRound size={16} aria-hidden="true" />
-              <span>Usuarios</span>
-            </NavLink>
-          )}
-        </nav>
-
         <div className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
           <main>
             <Outlet />
