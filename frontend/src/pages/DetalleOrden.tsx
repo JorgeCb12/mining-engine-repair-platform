@@ -62,7 +62,6 @@ export const DetalleOrden = () => {
   const [historial, setHistorial] = useState<HistorialEstado[]>([]);
   const [estado, setEstado] = useState<string>("recibido");
   const [comentario, setComentario] = useState("");
-  const [error, setError] = useState("");
   const [cargando, setCargando] = useState(true);
   const [actualizando, setActualizando] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
@@ -71,10 +70,9 @@ export const DetalleOrden = () => {
     let ignore = false;
     const fetchData = async () => {
       setCargando(true);
-      setError("");
 
       if (!id) {
-        setError("No se encontró el identificador de la orden.");
+        toast.error("No se encontró el identificador de la orden.");
         setCargando(false);
         return;
       }
@@ -90,7 +88,7 @@ export const DetalleOrden = () => {
           setHistorial(historialRes.data);
         }
       } catch {
-        if (!ignore) setError("No se pudo cargar la orden y su historial.");
+        if (!ignore) toast.error("No se pudo cargar la orden y su historial.");
       } finally {
         if (!ignore) setCargando(false);
       }
