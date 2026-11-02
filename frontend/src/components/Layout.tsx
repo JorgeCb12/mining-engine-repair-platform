@@ -136,28 +136,28 @@ export const Layout = () => {
 
       {/* Header superior y contenido */}
       <div className="flex flex-col flex-1 min-w-0 lg:pl-64">
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-white/5 bg-brand-bg/60 backdrop-blur-xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
+        <header className="sticky top-0 z-45 flex h-16 w-full items-center justify-between border-b border-white/5 bg-brand-bg/60 backdrop-blur-xl px-4 md:px-8 overflow-hidden">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(true)}
               aria-label="Abrir menú"
-              className="grid size-9 place-items-center rounded-lg border border-white/10 bg-white/5 text-muted hover:text-app hover:bg-white/10 lg:hidden"
+              className="grid size-9 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/5 text-muted hover:text-app hover:bg-white/10 lg:hidden"
             >
               <Menu size={20} aria-hidden="true" />
             </button>
             {/* Mobile branding */}
-            <div className="flex items-center gap-2 lg:hidden">
+            <div className="flex items-center gap-2 lg:hidden truncate">
               <img
                 src={logo}
                 alt="MineRepair Logo"
-                className="w-8 h-8 object-contain"
+                className="w-7 h-7 object-contain shrink-0"
               />
-              <span className="font-bold text-app tracking-tight">
+              <span className="font-bold text-app tracking-tight text-sm truncate">
                 MINEREPAIR
               </span>
             </div>
-            <div className="hidden lg:flex items-center gap-2 text-xs font-medium text-muted">
+            <div className="hidden lg:flex items-center gap-2 text-xs font-medium text-muted truncate">
               <span>Área de Operaciones</span>
               <span className="text-muted/40" aria-hidden="true">
                 /
@@ -166,9 +166,9 @@ export const Layout = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-1 sm:gap-2">
-            <div className="flex items-center gap-3 px-3 py-1.5 rounded-xl hover:bg-white/5 transition-colors cursor-pointer border border-transparent hover:border-white/10">
-              <div className="flex flex-col items-end">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+            <div className="flex items-center gap-3 px-2 sm:px-3 py-1.5 rounded-xl hover:bg-white/5 transition-colors cursor-pointer border border-transparent hover:border-white/10">
+              <div className="hidden sm:flex flex-col items-end">
                 <p className="max-w-44 truncate text-sm font-semibold text-app">
                   {user?.email ?? "Operador"}
                 </p>
@@ -176,24 +176,24 @@ export const Layout = () => {
                   {user?.role ?? "Industrial"}
                 </p>
               </div>
-              <div className="relative">
-                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-br from-brand-primary to-emerald-700 text-brand-bg font-bold text-lg ring-2 ring-white/10">
+              <div className="relative shrink-0">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-gradient-to-br from-brand-primary to-emerald-700 text-brand-bg font-bold text-base sm:text-lg ring-2 ring-white/10">
                   {user?.email?.charAt(0).toUpperCase() ?? "U"}
                 </div>
-                <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-brand-bg rounded-full"></span>
+                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-500 border-2 border-brand-bg rounded-full"></span>
               </div>
             </div>
 
-            <div className="w-px h-8 bg-white/10 mx-2"></div>
+            <div className="hidden sm:block w-px h-8 bg-white/10 mx-1"></div>
 
             <button
               type="button"
               onClick={handleLogout}
               aria-label="Cerrar sesión"
               title="Cerrar sesión"
-              className="w-10 h-10 flex items-center justify-center rounded-xl border border-white/10 text-muted hover:text-red-400 hover:border-red-400/30 hover:bg-red-400/10 transition-all"
+              className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center shrink-0 rounded-xl border border-white/10 bg-white/5 text-muted hover:text-red-400 hover:border-red-400/30 hover:bg-red-400/10 transition-all"
             >
-              <LogOut size={17} aria-hidden="true" />
+              <LogOut size={16} aria-hidden="true" />
             </button>
           </div>
         </header>
