@@ -33,7 +33,7 @@ export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="my-auto w-full max-w-2xl rounded-2xl glass-card p-6 shadow-2xl relative z-10"
+        className="my-auto w-11/12 md:w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl glass-card p-6 shadow-2xl relative z-10"
       >
         <div className="mb-5 flex items-center justify-between gap-4 border-b border-white/10 pb-4">
           <h2 className="text-xl font-bold font-display text-app">{title}</h2>

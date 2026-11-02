@@ -1,4 +1,5 @@
-import { LayoutDashboard, LogOut, UsersRound, Wrench } from "lucide-react";
+import { useState } from "react";
+import { LayoutDashboard, LogOut, Menu, UsersRound, Wrench, X } from "lucide-react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hook/useAuth";
 import logo from "../assets/logo.svg";
@@ -13,6 +14,7 @@ export const Layout = () => {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const isAdmin = user?.role === "administrador";
   const pageTitles: Record<string, string> = {
     "/dashboard": "Órdenes de Reparación",
@@ -30,12 +32,25 @@ export const Layout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-app font-sans text-app">
-      {/* Sidebar fijo izquierdo */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col bg-brand-bg/60 backdrop-blur-xl bg-gradient-to-b from-white/[0.03] to-transparent text-muted lg:flex border-r border-white/5">
-        <div className="flex h-16 items-center gap-3 px-6 border-b border-white/5">
+    <div className="min-h-screen bg-app font-sans text-app flex">
+      {/* Overlay para móvil */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar responsivo */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-64 flex-col bg-brand-bg/95 lg:bg-brand-bg/60 backdrop-blur-xl bg-gradient-to-b from-white/[0.03] to-transparent text-muted border-r border-white/5 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+          isMobileMenuOpen ? "translate-x-0 flex" : "-translate-x-full hidden lg:flex"
+        }`}
+      >
+        <div className="flex h-16 items-center justify-between px-6 border-b border-white/5">
           <NavLink
             to="/dashboard"
+            onClick={() => setIsMobileMenuOpen(false)}
             className="flex items-center gap-3 focus-visible:outline-2 focus-visible:outline-primary"
           >
             <img
@@ -52,6 +67,14 @@ export const Layout = () => {
               </span>
             </div>
           </NavLink>
+          <button
+            type="button"
+            onClick={() => setIsMobileMenuOpen(false)}
+            aria-label="Cerrar menú"
+            className="grid size-9 place-items-center rounded-lg text-muted hover:text-app hover:bg-white/5 lg:hidden"
+          >
+            <X size={20} aria-hidden="true" />
+          </button>
         </div>
 
         <nav
@@ -65,6 +88,7 @@ export const Layout = () => {
             <NavLink
               key={to}
               to={to}
+              onClick={() => setIsMobileMenuOpen(false)}
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium transition-all duration-200 ${
                   isActive
@@ -85,6 +109,7 @@ export const Layout = () => {
               </div>
               <NavLink
                 to="/usuarios"
+                onClick={() => setIsMobileMenuOpen(false)}
                 className={({ isActive }) =>
                   `flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium transition-all duration-200 ${
                     isActive
@@ -109,10 +134,18 @@ export const Layout = () => {
         </div>
       </aside>
 
-      {/* Header superior */}
-      <div className="lg:pl-64 flex flex-col min-h-screen">
-        <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-white/5 bg-brand-bg/60 backdrop-blur-xl px-4 sm:px-6 lg:px-8">
+      {/* Header superior y contenido */}
+      <div className="flex flex-col flex-1 min-w-0 lg:pl-64">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-white/5 bg-brand-bg/60 backdrop-blur-xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Abrir menú"
+              className="grid size-9 place-items-center rounded-lg border border-white/10 bg-white/5 text-muted hover:text-app hover:bg-white/10 lg:hidden"
+            >
+              <Menu size={20} aria-hidden="true" />
+            </button>
             {/* Mobile branding */}
             <div className="flex items-center gap-2 lg:hidden">
               <img
