@@ -22,6 +22,17 @@ MineRepair es un sistema de microservicios para gestionar reparaciones de motore
   </tr>
 </table>
 
+## 🔑 Credenciales de Demostración
+
+> **⚠️ Nota para evaluadores:** La aplicación está desplegada con datos de prueba. Puedes usar las siguientes cuentas de demostración (creadas exclusivamente para este portafolio) para explorar los diferentes roles del sistema:
+
+| Rol | Correo Electrónico | Contraseña |
+| :--- | :--- | :--- |
+| **Administrador** | `admin@minerarepair.com` | `password123` |
+| **Operativo (Técnico)** | `tecnico@minerarepair.com` | `password123` |
+
+*(El rol de Administrador permite gestionar usuarios, mientras que el Operativo tiene acceso restringido a la operación del taller).*
+
 ## Arquitectura
 
 El frontend consume dos APIs independientes: Express se ocupa de autenticación y usuarios; FastAPI ofrece las operaciones del dominio de reparaciones. Ambos servicios se conectan a PostgreSQL alojado en Supabase.
