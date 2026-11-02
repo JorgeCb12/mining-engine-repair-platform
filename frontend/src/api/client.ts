@@ -1,11 +1,15 @@
 import axios from "axios";
 
+const AUTH_URL = import.meta.env.VITE_AUTH_API_URL || "http://localhost:3001";
+const BUSINESS_URL =
+  import.meta.env.VITE_BUSINESS_API_URL || "http://localhost:8000";
+
 export const authApi = axios.create({
-  baseURL: "http://localhost:3001",
+  baseURL: AUTH_URL,
 });
 
 export const businessApi = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: BUSINESS_URL,
 });
 
 authApi.interceptors.request.use((config) => {
