@@ -9,7 +9,7 @@
 
 MineRepair es un sistema de microservicios para gestionar reparaciones de motores de minería pesada. Centraliza el registro de clientes y motores, la creación y seguimiento de órdenes y el control de acceso según roles, desde una interfaz web adaptable.
 
-## 📸 Capturas de Pantalla (Screenshots)
+## Capturas de Pantalla (Screenshots)
 
 <table>
   <tr>
@@ -91,7 +91,7 @@ Los servicios se ejecutan como contenedores independientes y se comunican con la
 
 Para más contexto sobre estas decisiones, consulta [Decisiones de Arquitectura y Trade-offs](docs/arquitectura-decisiones.md).
 
-## 🛡️ Security Roadmap & Trade-offs de Arquitectura
+## Security Roadmap & Trade-offs de Arquitectura
 
 Actualmente, el token JWT se maneja en el frontend decodificándolo del `localStorage` para extraer los roles. Si bien el backend está protegido contra manipulación de roles (validación criptográfica), el almacenamiento en `localStorage` es vulnerable a ataques XSS (Cross-Site Scripting).
 
